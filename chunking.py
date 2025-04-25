@@ -10,12 +10,12 @@ class TextChunker:
     # Default terminators for sentence boundaries across multiple languages
     DEFAULT_TERMINATORS = {
         "。", "？", "！", "；", "……", "…", "》", "】", "）",
-        "?", "!", ";", "…", """, ")", "]", "}", ".", "\n\n"
+        "?", "!", ";", "…", ")", "]", "}", ".", "\n\n"
     }
     
     def __init__(
         self, 
-        encoding_name: str = "cl100k_base",
+        encoding_name: str = "gpt-4o",
         terminators: Optional[Set[str]] = None,
         min_length: int = 128,
         max_length: int = 512
@@ -30,7 +30,7 @@ class TextChunker:
             max_length: Maximum token length for a chunk
         """
         try:
-            self.tokenizer = tiktoken.get_encoding(encoding_name)
+            self.tokenizer = tiktoken.encoding_for_model(encoding_name)
         except Exception as e:
             raise ValueError(f"Failed to initialize tokenizer with encoding '{encoding_name}': {e}")
             
@@ -143,7 +143,7 @@ class TextChunker:
 
 def split_chunks(
     text: str, 
-    terminators: List[str], 
+    terminators: List[str] = None, 
     min_length: int = 128, 
     max_length: int = 512
 ) -> List[str]:
@@ -160,8 +160,16 @@ def split_chunks(
         List of text chunks
     """
     chunker = TextChunker(
-        terminators=set(terminators),
+        terminators=set(terminators or TextChunker.DEFAULT_TERMINATORS),
         min_length=min_length,
         max_length=max_length
     )
     return chunker.split_text(text)
+
+if __name__ == "__main__":
+    text = "橡胶产业可谓是国民经济的重要支柱，它那琳琅满目的产品系列早已渗透进我们生活的方方面面。不管是我们触手可及的日用品，还是关乎生命的医疗器械，都离不开这个行业的默默付出。更令人惊叹的是，在新兴产业以及采掘、运输、建设等重工业领域，橡胶的身影更是无处不在，扮演着举足轻重的角色。要知道，固体橡胶那庞大的分子量实在令人咋舌，从数十万到百万级的数值跨度，着实让人印象深刻。然而，要想将这些原料变成实用的制品，就不得不经历切胶、破解、塑化等一系列繁琐工序，这个过程不仅耗时耗力，还白白消耗了大量能源。更让人头疼的是，经过硫化处理的橡胶制品几乎无法进行二次加工和循环利用，一旦被丢弃，不仅造成资源的无谓浪费，还会给我们赖以生存的环境带来难以消除的污染。"
+    chunks = split_chunks(text, min_length=50, max_length=100)
+    print(chunks)
+    """
+    ['橡胶产业可谓是国民经济的重要支柱，它那琳琅满目的产品系列早已渗透进我们生活的方方面面。不管是我们触手可及的日用品，还是关乎生命的医疗器械，都离不开这个行业的默默付出。', '更令人惊叹的是，在新兴产业以及采掘、运输、建设等重工业领域，橡胶的身影更是无处不在，扮演着举足轻重的角色。要知道，固体橡胶那庞大的分子量实在令人咋舌，从数十万到百万级的数值跨度，着实让人印象深刻。然而，要想将这些原料变成实用的', '制品，就不得不经历切胶、破解、塑化等一系列繁琐工序，这个过程不仅耗时耗力，还白白消耗了大量能源。更让人头疼的是，经过硫化处理的橡胶制品几乎无法进行二次加工和循环利用，一旦被丢弃，不仅造成资源的无谓浪费，还会给我们赖以生存的环境带来难以消除的污染。']
+    """

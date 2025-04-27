@@ -82,7 +82,7 @@ TextChunker works with multiple languages. The default terminators include commo
 ```python
 DEFAULT_TERMINATORS = {
     "。", "？", "！", "；", "……", "…", "》", "】", "）",
-    "?", "!", ";", "…", """, ")", "]", "}", ".", "\n\n"
+    "?", "!", ";", "…", '"', ")", "]", "}", ".", "\n\n"
 }
 ```
 
